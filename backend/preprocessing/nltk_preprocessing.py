@@ -5,7 +5,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from remove_measurements import remove_measurements
+from remove_measurements import clean_ingredient
 
 
 # nltk.download("punkt")
@@ -24,7 +24,7 @@ def clean_ingredients_nltk(ingredient):
     """Cleans ingredient text using NLTK (tokenization, stopword removal, lemmatization)."""
     if not isinstance(ingredient, str):  # Ensure ingredient is a string
         return ""
-    ingredient = remove_measurements(ingredient)  # Remove measurement words
+    ingredient = clean_ingredient(ingredient)  # Remove measurement and other words
     words = word_tokenize(ingredient.lower())  # Tokenization
     words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]  # Lemmatization & Stopword removal
     return " ".join(words)
