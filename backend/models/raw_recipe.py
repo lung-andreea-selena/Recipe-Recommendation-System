@@ -1,7 +1,7 @@
 from models.base_model import BaseModel
 
 class RawRecipe(BaseModel):
-    def __init__(self, recipe_id, title, ingredients, directions, link, source, ner):
+    def __init__(self, recipe_id, title, ingredients, directions, link, source):
         self.recipe_id = recipe_id
         self.title = title
         self.ingredients = ingredients

@@ -1,6 +1,5 @@
 import pandas as pd
 
-# Paths
 csv_path = "../dataset/full_dataset.csv"
 parquet_path = "../dataset/recipes.parquet"
 
