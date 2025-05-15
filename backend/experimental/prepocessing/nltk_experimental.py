@@ -10,26 +10,26 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
-# Make sure you have the necessary NLTK data
+
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('stopwords')
 
-# Setup
+
 stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
 
-# Load ingredients
+
 with open("first_200_ingredients_not_cleaned.txt", "r", encoding="utf-8") as file:
     lines = [line.strip() for line in file if line.strip()]
 
-# Cleaning function using NLTK
+
 def clean_with_nltk(text):
     tokens = word_tokenize(text)
     filtered = [lemmatizer.lemmatize(word.lower()) for word in tokens if word.lower() not in stop_words and word.isalpha()]
     return " ".join(filtered)
 
-# Run experiments
+
 results = []
 start = time.time()
 for line in lines:
@@ -40,7 +40,7 @@ for line in lines:
     })
 elapsed = time.time() - start
 
-# Save results
+
 df = pd.DataFrame(results)
 df.to_csv("nltk_experiment_results.csv", index=False)
 

@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional
 from models.raw_recipe import RawRecipe
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -19,17 +19,18 @@ class RawRecipesRepo:
             logger.exception("Failed to fetch all raw recipes")
             return []
 
-    def get_by_id(self, recipe_id)-> Optional[RawRecipe]:
-        if not isinstance(recipe_id, int):
-            logger.warning(f"Invalid recipe_id type: {type(recipe_id)}")
-            return None
+    def get_by_ids(self, recipe_ids: List[int]) -> Dict[int, RawRecipe]:
+        """
+        Batch-fetch all the RawRecipe for the given list of IDs,
+        and return a dict recipe_id → RawRecipe.
+        """
+        if not recipe_ids:
+            return {}
 
-        try:
-            query =text("SELECT recipe_id, title, ingredients, directions, link, source FROM raw_recipes WHERE recipe_id = :recipe_id")
-            result = self._db_session.execute(query, {"recipe_id": recipe_id}).fetchone()
-            if result:
-                return RawRecipe(*result)
-            return None
-        except Exception as e:
-            logger.exception(f"Failed to fetch raw recipe for recipe_id={recipe_id}")
-            return None
+        query = text("""
+            SELECT recipe_id, title, ingredients, directions, link, source
+              FROM raw_recipes
+             WHERE recipe_id = ANY(:ids)
+        """)
+        rows = self._db_session.execute(query, {"ids": recipe_ids}).fetchall()
+        return {row[0]: RawRecipe(*row) for row in rows}
