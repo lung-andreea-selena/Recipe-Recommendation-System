@@ -1,0 +1,56 @@
+<div class="home-shell">
+  <h2 class="mission">
+    “Find recipes with what’s in your kitchen and cut down on food waste.”
+  </h2>
+
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search ingredients…</mat-label>
+    <input matInput [(ngModel)]="searchTerm" placeholder="Type to filter">
+    <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="searchTerm = ''">
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <div class="lists">
+    <mat-card class="list-card available">
+      <mat-card-title>Available Ingredients:</mat-card-title>
+      <mat-list>
+        <mat-list-item *ngFor="let ing of filteredAvailable">
+          {{ ing.name }}
+          <span class="spacer"></span>
+          <button
+            mat-mini-button
+            color="primary"
+            (click)="add(ing)"
+            [disabled]="isSelected(ing)"
+          >
+            Add
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </mat-card>
+
+    <mat-card class="list-card selected">
+      <mat-card-title>Selected Ingredients:</mat-card-title>
+      <mat-list>
+        <mat-list-item *ngFor="let ing of selectedIngredients">
+          {{ ing.name }}
+          <span class="spacer"></span>
+          <button mat-icon-button color="warn" (click)="remove(ing)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </mat-card>
+  </div>
+
+  <div class="action">
+    <button
+      mat-raised-button
+      color="accent"
+      [disabled]="!selectedIngredients.length"
+    >
+      Show me recipes →
+    </button>
+  </div>
+</div>

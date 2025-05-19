@@ -1,0 +1,42 @@
+.home-shell {
+  max-width: 900px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .mission {
+    text-align: center;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+
+  .lists {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+
+    .list-card {
+      flex: 1 1 300px;
+      max-height: 400px;
+      overflow: auto;
+
+      .mat-list-item {
+        align-items: center;
+      }
+
+      .spacer {
+        flex: 1 1 auto;
+      }
+    }
+  }
+
+  .action {
+    text-align: center;
+    margin-top: 1rem;
+  }
+}
