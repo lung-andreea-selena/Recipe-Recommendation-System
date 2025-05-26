@@ -1,29 +1,24 @@
 import { Component, OnInit } from '@angular/core';
-import { PantryService, Recipe } from '../services/pantry.service';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
+import { PantryService } from '../services/pantry.service';
+import { RecipeDTO } from '../models/recipe_dto';
 
 @Component({
   selector: 'app-recipes',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule],
+  imports: [CommonModule, MatCardModule],
   templateUrl: './recipes.component.html',
   styleUrls: ['./recipes.component.scss'],
 })
 export class RecipesComponent implements OnInit {
-  recipes: Recipe[] = [];
+  recipes: RecipeDTO[] = [];
 
-  constructor(private pantry: PantryService, private router: Router) {}
+  constructor(private pantry: PantryService) {}
 
   ngOnInit() {
     this.pantry.recommend().subscribe((res) => {
       this.recipes = res.recipes;
     });
-  }
-
-  seeDetails(r: Recipe) {
-    this.router.navigate(['/recipes', r.recipe_id]);
   }
 }

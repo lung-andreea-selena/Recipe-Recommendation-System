@@ -1,0 +1,11 @@
+.cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.missing {
+  color: red;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}

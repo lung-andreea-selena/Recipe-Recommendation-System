@@ -98,4 +98,4 @@ class PantryRecommender:
                   f"missing={r['missing']}  score={r['score']:.3f}")
         print()
 
-        return recipe_ids
+        return out

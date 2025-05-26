@@ -4,11 +4,9 @@
     <mat-card-title>{{ r.title }}</mat-card-title>
     <mat-card-content>
       <p><strong>Ingredients:</strong> {{ r.ingredients.join(', ') }}</p>
+      <p *ngIf="r.has_missing_ingredients" class="missing">
+        Ingredients missing
+      </p>
     </mat-card-content>
-    <mat-card-actions>
-      <button mat-button (click)="seeDetails(r)">
-        See all details
-      </button>
-    </mat-card-actions>
   </mat-card>
 </div>
