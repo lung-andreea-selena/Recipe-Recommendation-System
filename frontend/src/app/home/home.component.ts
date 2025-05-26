@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
+import { PantryService } from '../services/pantry.service';
 
 interface Ingredient {
   id: number;
@@ -35,7 +37,11 @@ export class HomeComponent implements OnInit {
   selectedIngredients: Ingredient[] = [];
   searchTerm = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private pantry: PantryService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.http
@@ -54,7 +60,8 @@ export class HomeComponent implements OnInit {
           return true;
         }
         return words.some((w) => w.startsWith(term));
-      });
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   isSelected(ing: Ingredient) {
@@ -71,5 +78,10 @@ export class HomeComponent implements OnInit {
     this.selectedIngredients = this.selectedIngredients.filter(
       (x) => x.id !== ing.id
     );
+  }
+
+  gotoRecipes() {
+    this.pantry.setSelected(this.selectedIngredients.map((i) => i.name));
+    this.router.navigate(['/recipes']);
   }
 }
