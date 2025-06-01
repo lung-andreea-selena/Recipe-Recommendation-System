@@ -1,5 +1,7 @@
-<h2>Recommended Recipes</h2>
-<div class="cards">
+<div *ngIf="loading" class="loader-container">
+  <ng-lottie [options]="lottieOptions"></ng-lottie>
+</div>
+<div *ngIf="!loading" class="cards">
   <mat-card *ngFor="let r of recipes">
     <mat-card-title>{{ r.title }}</mat-card-title>
     <mat-card-content>
@@ -8,5 +10,8 @@
         Ingredients missing
       </p>
     </mat-card-content>
+    <mat-card-actions>
+      <button mat-button (click)="seeDetails(r)">See all details</button>
+    </mat-card-actions>
   </mat-card>
 </div>

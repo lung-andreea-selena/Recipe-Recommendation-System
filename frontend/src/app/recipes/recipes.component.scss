@@ -9,3 +9,18 @@
   font-weight: bold;
   margin-top: 0.5rem;
 }
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh; 
+  width: 100%;
+}
+
+ng-lottie {
+  display: block;
+  width: 200px;  
+  height: 200px;
+}
+

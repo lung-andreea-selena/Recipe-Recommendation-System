@@ -1,0 +1,39 @@
+<!-- src/app/recipe-details/recipe-details.component.html -->
+
+<div *ngIf="loading">
+  <p>Loading recipe details…</p>
+</div>
+
+<div *ngIf="error">
+  <p class="error">{{ error }}</p>
+</div>
+
+<div *ngIf="!loading && recipe">
+  <mat-card>
+    <mat-card-title>{{ recipe.title }}</mat-card-title>
+    <mat-card-content>
+      <h3>Ingredients</h3>
+      <ul>
+        <li *ngFor="let ing of recipe.ingredients">{{ ing }}</li>
+      </ul>
+
+      <h3>Directions</h3>
+      <ol>
+        <li *ngFor="let step of recipe.directions">{{ step }}</li>
+      </ol>
+
+      <p *ngIf="recipe.link">
+        <strong>Link:</strong>
+        <a [href]="recipe.link" target="_blank" rel="noopener">
+          {{ recipe.link }}
+        </a>
+      </p>
+      <p *ngIf="recipe.source">
+        <strong>Source:</strong> {{ recipe.source }}
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button (click)="goBack()">← Back to list</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

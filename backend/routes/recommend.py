@@ -1,6 +1,7 @@
 import time
 from flask import Blueprint, request, jsonify, current_app
 from dtos.recipe_dto import RecipeDTO
+from repositories.raw_recipes_repo import RawRecipesRepo
 
 recommend_bp = Blueprint("recommend", __name__)
 
@@ -30,6 +31,7 @@ def recommend():
         ingr_list = [i.strip() for i in raw.ingredients.split(",") if i.strip()]
 
         dto = RecipeDTO(
+            recipe_id=raw.recipe_id,
             title=raw.title,
             ingredients=ingr_list,
             has_missing_ingredients=(r["missing"] > 0)
@@ -40,3 +42,14 @@ def recommend():
     print(f"[LOG] batch get_by_ids took {elapsed:.3f}s")
 
     return jsonify(page=page, per_page=per_page, recipes=results), 200
+
+@recommend_bp.route("/recipe/<int:recipe_id>", methods=["GET"])
+def get_recipe(recipe_id: int):
+    raw_repo = current_app.config['RAW_RECIPES_REPO']
+
+    raw_map = raw_repo.get_by_ids([recipe_id])
+    raw = raw_map.get(recipe_id)
+    if raw is None:
+        return jsonify(error=f"Recipe {recipe_id} not found"), 404
+
+    return jsonify(raw.to_dict()), 200
