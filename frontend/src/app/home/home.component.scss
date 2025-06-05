@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  background-color: #ffefe0;
 
   .mission {
     text-align: center;
@@ -39,4 +40,5 @@
     text-align: center;
     margin-top: 1rem;
   }
+  --mdc-elevated-card-container-color: #e3cebb;
 }

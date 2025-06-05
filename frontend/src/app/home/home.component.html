@@ -18,13 +18,13 @@
         <mat-list-item *ngFor="let ing of filteredAvailable">
           {{ ing.name }}
           <span class="spacer"></span>
-          <button
-            mat-mini-button
+          <button mat-icon-button
             color="primary"
+            aria-label="Add ingredient"
             (click)="add(ing)"
             [disabled]="isSelected(ing)"
           >
-            Add
+            <mat-icon>add</mat-icon>
           </button>
         </mat-list-item>
       </mat-list>
@@ -48,7 +48,7 @@
     <button
       mat-raised-button
       color="accent"
-      [disabled]="!selectedIngredients.length"
+      [disabled]="selectedIngredients.length < 3"
       (click)="gotoRecipes()"
     >
       Show me recipes →

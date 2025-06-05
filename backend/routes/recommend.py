@@ -1,5 +1,5 @@
 import time
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, json, request, jsonify, current_app
 from dtos.recipe_dto import RecipeDTO
 from repositories.raw_recipes_repo import RawRecipesRepo
 
@@ -18,6 +18,8 @@ def recommend():
     recommender = current_app.config["PANTRY_RECOMMENDER"]
     raw_repo = current_app.config["RAW_RECIPES_REPO"]
     recs = recommender.recommend(ingredients, page, per_page)
+    has_more = bool(recommender.recommend(ingredients, page + 1, 1))
+
 
     t0 = time.time()
     ids = [r["recipe_id"] for r in recs]
@@ -28,7 +30,14 @@ def recommend():
         if not raw:
             continue
 
-        ingr_list = [i.strip() for i in raw.ingredients.split(",") if i.strip()]
+        try:
+            maybe = json.loads(raw.ingredients)
+            if isinstance(maybe, list):
+                ingr_list = [str(i).strip() for i in maybe if str(i).strip()]
+            else:
+                raise ValueError
+        except Exception:
+            ingr_list = [i.strip() for i in raw.ingredients.split(",") if i.strip()]
 
         dto = RecipeDTO(
             recipe_id=raw.recipe_id,
@@ -41,7 +50,7 @@ def recommend():
     elapsed = time.time() - t0
     print(f"[LOG] batch get_by_ids took {elapsed:.3f}s")
 
-    return jsonify(page=page, per_page=per_page, recipes=results), 200
+    return jsonify(page=page, per_page=per_page, has_more=has_more, recipes=results), 200
 
 @recommend_bp.route("/recipe/<int:recipe_id>", methods=["GET"])
 def get_recipe(recipe_id: int):

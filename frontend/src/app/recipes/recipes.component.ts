@@ -3,26 +3,25 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { PantryService } from '../services/pantry.service';
 import { RecipeDTO } from '../models/recipe_dto';
-import { NavigationEnd, Router } from '@angular/router';
-import { filter, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { LottieComponent } from 'ngx-lottie';
 import { AnimationOptions } from 'ngx-lottie';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-recipes',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    LottieComponent, 
-  ],
+  imports: [CommonModule, MatCardModule, LottieComponent],
   templateUrl: './recipes.component.html',
   styleUrls: ['./recipes.component.scss'],
 })
 export class RecipesComponent implements OnInit, OnDestroy {
   recipes: RecipeDTO[] = [];
-  page = 0;
-  perPage = 20;
+  hasMore = false;
+  loading = false;
+
+  readonly perPage = 20;
 
   lottieOptions: AnimationOptions = {
     path: 'assets/loader.json',
@@ -31,46 +30,38 @@ export class RecipesComponent implements OnInit, OnDestroy {
     loop: true,
   };
 
-  loading = false; 
-  private navSub!: Subscription;
+  private sub!: Subscription;
 
   constructor(private pantry: PantryService, private router: Router) {}
 
-  ngOnInit() {
-    this.fetchRecipes();
+  currentPage = 0;
 
-    this.navSub = this.router.events
+  ngOnInit() {
+    this.sub = this.pantry.reload$
       .pipe(
-        filter((ev) => ev instanceof NavigationEnd),
-        filter((ev: NavigationEnd) =>
-          ev.urlAfterRedirects.startsWith('/recipes')
-        )
+        switchMap((state) => {
+          this.loading = true;
+          return this.pantry.recommend(state, this.perPage);
+        })
       )
-      .subscribe(() => {
-        this.fetchRecipes();
+      .subscribe((resp) => {
+        this.recipes = resp.recipes; // already string[]
+        this.hasMore = resp.has_more;
+        this.currentPage = resp.page;
+        this.loading = false;
       });
   }
 
   ngOnDestroy() {
-    this.navSub?.unsubscribe();
+    this.sub?.unsubscribe();
   }
 
-  private fetchRecipes() {
-    this.loading = true;
-
-    setTimeout(() => {
-      this.pantry.recommend(this.page, this.perPage).subscribe(
-        (resp) => {
-          this.recipes = resp.recipes;
-          this.loading = false;
-        },
-        () => {
-          this.loading = false;
-        }
-      );
-    }, 0);
+  nextPage() {
+    this.pantry.setPage(+1);
   }
-
+  prevPage() {
+    this.pantry.setPage(-1);
+  }
   seeDetails(r: RecipeDTO) {
     this.router.navigate(['/recipes', r.recipe_id]);
   }

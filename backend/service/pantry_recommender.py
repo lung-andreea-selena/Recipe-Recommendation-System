@@ -87,7 +87,7 @@ class PantryRecommender:
                 "missing":    x,
                 "score":      float(sim)
             })
-        out.sort(key=lambda r: (-r["matched"], -r["score"]))
+        out.sort(key=lambda r: (r["missing"], -r["matched"], -r["score"]))
 
         recipe_ids = [r["recipe_id"] for r in out]
 
