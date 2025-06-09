@@ -1,26 +1,35 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { PantryService } from '../services/pantry.service';
 import { RecipeDTO } from '../models/recipe_dto';
-import { Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs/operators';
 import { LottieComponent } from 'ngx-lottie';
 import { AnimationOptions } from 'ngx-lottie';
-import { Router } from '@angular/router';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { RecipeDetailsComponent } from '../recipe-details/recipe-details.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-recipes',
   standalone: true,
-  imports: [CommonModule, MatCardModule, LottieComponent],
+  imports: [CommonModule, MatCardModule, LottieComponent, MatDialogModule],
   templateUrl: './recipes.component.html',
   styleUrls: ['./recipes.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RecipesComponent implements OnInit, OnDestroy {
+export class RecipesComponent implements OnInit {
   recipes: RecipeDTO[] = [];
   hasMore = false;
   loading = false;
-
+  currentPage = 0;
   readonly perPage = 20;
 
   lottieOptions: AnimationOptions = {
@@ -30,30 +39,31 @@ export class RecipesComponent implements OnInit, OnDestroy {
     loop: true,
   };
 
-  private sub!: Subscription;
-
-  constructor(private pantry: PantryService, private router: Router) {}
-
-  currentPage = 0;
+  constructor(
+    private pantry: PantryService,
+    private dialog: MatDialog,
+    private destroyRef: DestroyRef,
+    private cdr: ChangeDetectorRef,
+    private location: Location
+  ) {}
 
   ngOnInit() {
-    this.sub = this.pantry.reload$
+    this.pantry.reload$
       .pipe(
         switchMap((state) => {
           this.loading = true;
+          this.cdr.markForCheck();
           return this.pantry.recommend(state, this.perPage);
-        })
+        }),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((resp) => {
-        this.recipes = resp.recipes; // already string[]
+        this.recipes = resp.recipes;
         this.hasMore = resp.has_more;
         this.currentPage = resp.page;
         this.loading = false;
+        this.cdr.markForCheck();
       });
-  }
-
-  ngOnDestroy() {
-    this.sub?.unsubscribe();
   }
 
   nextPage() {
@@ -62,7 +72,18 @@ export class RecipesComponent implements OnInit, OnDestroy {
   prevPage() {
     this.pantry.setPage(-1);
   }
-  seeDetails(r: RecipeDTO) {
-    this.router.navigate(['/recipes', r.recipe_id]);
+  openDialog(id: number): void {
+    this.location.go(`/recipes/${id}`);
+
+    const ref = this.dialog.open(RecipeDetailsComponent, {
+      maxWidth: '600px',
+      width: '95%',
+      data: { id },
+      panelClass: 'details-dialog',
+    });
+
+    ref.afterClosed().subscribe(() => {
+      this.location.go('/recipes');
+    });
   }
 }

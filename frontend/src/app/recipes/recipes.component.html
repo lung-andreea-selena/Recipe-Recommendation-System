@@ -3,26 +3,22 @@
 </div>
 
 <div *ngIf="!loading" class="cards">
-  <mat-card *ngFor="let r of recipes">
+  <mat-card *ngFor="let r of recipes" (click)="openDialog(r.recipe_id)" class="recipe-card">
     <mat-card-title>{{ r.title }}</mat-card-title>
 
     <mat-card-content>
-      <p><strong>Ingredients:</strong> {{ r.ingredients.join(', ') }}</p>
+      <p class="p-ingredients">Ingredients: {{ r.ingredients.join(', ') }}</p>
       <p *ngIf="r.has_missing_ingredients" class="missing">
-        Ingredients missing
+        Note: You are missing some ingredients for this recipe.
       </p>
     </mat-card-content>
-
-    <mat-card-actions>
-      <button mat-button (click)="seeDetails(r)">See all details</button>
-    </mat-card-actions>
   </mat-card>
 
   <div class="paginator">
   <button mat-stroked-button
           (click)="prevPage()"
           [disabled]="currentPage === 0 || loading">
-    ‹ Previous
+    ‹ Prev
   </button>
 
   <span class="page-indicator">

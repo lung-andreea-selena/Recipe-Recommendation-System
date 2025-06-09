@@ -3,3 +3,29 @@
   font-weight: bold;
   margin: 1rem;
 }
+
+.mat-mdc-dialog-title {
+    font-size: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+    background-color: #095d63;
+    color: #ffefe0;
+    border-radius: 4px; 
+}
+
+.mat-mdc-dialog-content{
+  background-color: #ffefe0;
+}
+
+.mat-mdc-button{
+ --mat-sys-primary: #095d63;
+}
+
+.mat-mdc-dialog-surface{
+  background-color: #ffefe0;
+}
+
+.mat-mdc-dialog-actions{
+  background-color: #ffefe0;
+  --mat-dialog-actions-padding: 5px 16px;
+}

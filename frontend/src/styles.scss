@@ -1,4 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif;background-color: #ffefe0; }
+
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif;background:linear-gradient(1deg,rgba(9, 93, 99, 1) 0%, rgba(255, 239, 224, 1) 90%); }
+body.recipes-bg {
+  background: #ffffff;    
+}

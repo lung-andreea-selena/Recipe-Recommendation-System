@@ -2,12 +2,35 @@
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  --mdc-elevated-card-container-elevation: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  --mdc-elevated-card-container-color: #ffefe0;
+  margin: 15px;
+
+  .mat-mdc-card-title{
+    font-size: 1.1rem;
+    text-align: center;
+    font-weight: 500;
+    background-color: #095d63;
+    color: #ffefe0;
+    border-radius: 4px;
+  }
+
+  .mat-mdc-card:hover {
+    background-color: #e3cebb;
+  }
+
+  button{
+    border-radius: 7px;
+    background-color: #e3cebb;
+    border-color: #0000007e;
+  }
 }
 
 .missing {
-  color: red;
-  font-weight: bold;
+  font-weight: 400;
   margin-top: 0.5rem;
+  font-style: italic;
+  color:#095d63
 }
 
 .loader-container {
@@ -20,19 +43,24 @@
 
 ng-lottie {
   display: block;
-  width: 200px;  
-  height: 200px;
+  margin-top: 100px;
+  width: 500px;  
+  height: 500px;
 }
 
 .paginator {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin: 2rem 0 1rem;
+  margin: 2rem 1rem;
 }
 
 .page-indicator {
-  font-weight: 600;
+  font-weight: 500;
+  color: #095d63;
 }
+
+
 

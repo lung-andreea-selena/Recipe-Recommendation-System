@@ -1,11 +1,11 @@
 <div class="home-shell">
   <h2 class="mission">
-    “Find recipes with what’s in your kitchen and cut down on food waste.”
+    Find recipes with what’s in your kitchen and cut down on food waste :)
   </h2>
 
   <mat-form-field appearance="outline" class="search-field">
-    <mat-label>Search ingredients…</mat-label>
-    <input matInput [(ngModel)]="searchTerm" placeholder="Type to filter">
+    <mat-label>Search available ingredients…</mat-label>
+    <input #serachBox matInput [(ngModel)]="searchTerm" placeholder="Type to filter">
     <button mat-icon-button matSuffix *ngIf="searchTerm" (click)="searchTerm = ''">
       <mat-icon>close</mat-icon>
     </button>

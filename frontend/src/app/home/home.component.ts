@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -37,6 +37,8 @@ export class HomeComponent implements OnInit {
   selectedIngredients: Ingredient[] = [];
   searchTerm = '';
 
+  @ViewChild('searchBox') searchBox!: ElementRef<HTMLInputElement>;
+
   constructor(
     private http: HttpClient,
     private pantry: PantryService,
@@ -72,6 +74,8 @@ export class HomeComponent implements OnInit {
     if (!this.isSelected(ing)) {
       this.selectedIngredients = [...this.selectedIngredients, ing];
     }
+    this.searchTerm = '';
+    this.searchBox?.nativeElement.focus();
   }
 
   remove(ing: Ingredient) {
