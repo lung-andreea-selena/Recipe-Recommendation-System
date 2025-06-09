@@ -21,12 +21,12 @@ export class AppComponent {
       this.router.events
         .pipe(filter((e) => e instanceof NavigationEnd))
         .subscribe((e: NavigationEnd) => {
-          const body = document.body;
+          const html = document.documentElement;
 
           if (e.urlAfterRedirects.startsWith('/recipes')) {
-            body.classList.add('recipes-bg');
+            html.classList.add('recipes-bg');
           } else {
-            body.classList.remove('recipes-bg');
+            html.classList.remove('recipes-bg');
           }
         });
     }
