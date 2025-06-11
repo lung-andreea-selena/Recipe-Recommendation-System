@@ -1,65 +1,42 @@
+from typing import List, Dict, Any, Sequence, Set
 import time
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from typing import List, Dict, Sequence, Set
-import joblib
-from scipy import sparse
+
+from utils.phrase_tokenizer import tokenizer
+
 
 class PantryRecommender:
     def __init__(
         self,
         vectorizer,
         tfidf_matrix,
-        recipe_ids,
-        cleaned_records:   List[Dict[str, str]]
-    ):
-        """
-        Loads precomputed TF–IDF artifacts plus cleaned ingredient data.
-        """
-        self.vectorizer   = vectorizer
+        recipe_ids: Sequence[int],
+        cleaned_records: List[Dict[str, Any]],
+    ) -> None:
+        self.vectorizer = vectorizer
         self.tfidf_matrix = tfidf_matrix
-        self.recipe_ids   = recipe_ids
-        self.records      = cleaned_records
+        self.recipe_ids = recipe_ids
+        self.records = cleaned_records
+        self.token_sets: List[Set[str]] = [
+            set(tokenizer(r.get("ingredients") or "")) for r in cleaned_records
+        ]
 
-        self.token_sets = [set((r.get("ingredients") or "").split()) for r in cleaned_records]
-
-        print(
-            f"[INIT] Loaded TF–IDF (vocab={len(self.vectorizer.vocabulary_)}, "
-            f"docs={self.tfidf_matrix.shape[0]})"
-        )
-
-
-    def recommend(
+    def _select_candidates(
         self,
-        pantry_list: List[str],
-        page: int     = 0,
-        per_page: int = 20,
-        min_match: int= 2
-    ) -> List[int]:
-        t0 = time.time()
-
-        pantry = {
-            w
-            for entry in pantry_list
-            for w in entry.lower().replace(",", " ").split()
-            if w
-        }
-        print(f"[LOG] Pantry tokens = {sorted(pantry)}")
-        if not pantry:
-            return []
-
+        pantry_tokens: Set[str],
+        min_match: int,
+        needed: int,
+    ) -> List[tuple[int, int, int]]:
         stats = []
         for idx, toks in enumerate(self.token_sets):
-            m = len(toks & pantry)
-            x = len(toks - pantry)
-            if m >= min_match:
-                stats.append((idx, m, x))
+            matched = len(toks & pantry_tokens)
+            if matched >= min_match:
+                missing = len(toks - pantry_tokens)
+                stats.append((idx, matched, missing))
 
-        needed      = (page + 1) * per_page
-        picked      = []
-        miss        = 0
-        max_missing = max((x for _,_,x in stats), default=0)
+        picked: List[tuple[int, int, int]] = []
+        miss = 0
+        max_missing = max((x for _, _, x in stats), default=0)
         while len(picked) < needed and miss <= max_missing:
             for idx, m, x in stats:
                 if x == miss:
@@ -67,35 +44,52 @@ class PantryRecommender:
                     if len(picked) >= needed:
                         break
             miss += 1
+        return picked
 
-        start      = page * per_page
-        page_stats = picked[start : start + per_page]
-        if not page_stats:
-            print("[LOG] no recipes for this page")
+    def recommend(
+        self,
+        pantry_list: List[str],
+        page: int = 0,
+        per_page: int = 20,
+        min_match: int = 2,
+    ) -> List[Dict[str, Any]]:
+        start_time = time.time()
+
+        pantry_tokens = set(tokenizer(" ".join(pantry_list)))
+        print(f"[LOG] Pantry tokens = {sorted(pantry_tokens)}")
+        if not pantry_tokens:
             return []
 
-        query_str = " ".join(pantry)
-        q_vec     = self.vectorizer.transform([query_str])
-        row_idxs  = [idx for idx,_,_ in page_stats]
-        sim_vals  = cosine_similarity(q_vec, self.tfidf_matrix[row_idxs]).flatten()
+        needed = (page + 1) * per_page
+        page_stats = self._select_candidates(pantry_tokens, min_match, needed)[
+            page * per_page : (page + 1) * per_page
+        ]
+        if not page_stats:
+            return []
 
-        out = []
-        for (idx, m, x), sim in zip(page_stats, sim_vals):
-            out.append({
-                "recipe_id": int(self.recipe_ids[idx]),
-                "matched":    m,
-                "missing":    x,
-                "score":      float(sim)
-            })
-        out.sort(key=lambda r: (r["missing"], -r["matched"], -r["score"]))
+        query_str = " ".join(pantry_tokens)
+        query_vec = self.vectorizer.transform([query_str])
+        row_idxs = [idx for idx, _, _ in page_stats]
+        similarities = cosine_similarity(query_vec, self.tfidf_matrix[row_idxs]).flatten()
 
-        recipe_ids = [r["recipe_id"] for r in out]
+        results = []
+        for (idx, matched, missing), score in zip(page_stats, similarities):
+            results.append(
+                {
+                    "recipe_id": int(self.recipe_ids[idx]),
+                    "matched": matched,
+                    "missing": missing,
+                    "score": float(score),
+                }
+            )
 
-        elapsed = time.time() - t0
-        print(f"[LOG] recommendation took {elapsed:.3f}s → returned {len(recipe_ids)} recipes")
-        for i, r in enumerate(out, 1):
+        results.sort(key=lambda r: (r["missing"], -r["matched"], -r["score"]))
+
+        elapsed = time.time() - start_time
+        print(f"[LOG] recommendation took {elapsed:.3f}s → returned {len(results)} recipes")
+        for i, r in enumerate(results, 1):
             print(f"  {i:2}. #{r['recipe_id']}  matched={r['matched']}  "
                   f"missing={r['missing']}  score={r['score']:.3f}")
         print()
 
-        return out
+        return results
