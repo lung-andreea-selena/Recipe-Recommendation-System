@@ -18,7 +18,7 @@ with open(PHRASES_PATH, "r", encoding="utf-8") as f:
 
 if not PHRASES:
     raise ValueError(
-        "phrases.txt is empty or contains no multi‑word entries — cannot build tokenizer"
+        "phrase_file.txt is empty or contains no multi‑word entries — cannot build tokenizer"
     )
 
 JOIN_RE: re.Pattern[str] = re.compile(
