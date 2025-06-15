@@ -8,6 +8,9 @@ from repositories.cleaned_ingredients_repo import CleanedIngredientsRepo
 from repositories.raw_recipes_repo import RawRecipesRepo
 from service.pantry_recommender import PantryRecommender
 from routes.recommend import recommend_bp
+from utils.logging_config import setup_logging
+
+setup_logging()
 
 def create_app():
     app = Flask(__name__)

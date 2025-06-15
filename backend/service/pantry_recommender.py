@@ -1,9 +1,9 @@
 from typing import List, Dict, Any, Sequence, Set
-import time
+import time, logging
 from sklearn.metrics.pairwise import cosine_similarity
-
 from utils.phrase_tokenizer import tokenizer
 
+logger = logging.getLogger(__name__)
 
 class PantryRecommender:
     def __init__(
@@ -56,7 +56,7 @@ class PantryRecommender:
         start_time = time.time()
 
         pantry_tokens = set(tokenizer(" ".join(pantry_list)))
-        print(f"[LOG] Pantry tokens = {sorted(pantry_tokens)}")
+        logger.info("Pantry tokens: %s", sorted(pantry_tokens))
         if not pantry_tokens:
             return []
 
@@ -86,10 +86,12 @@ class PantryRecommender:
         results.sort(key=lambda r: (r["missing"], -r["matched"], -r["score"]))
 
         elapsed = time.time() - start_time
-        print(f"[LOG] recommendation took {elapsed:.3f}s → returned {len(results)} recipes")
+        logger.info(
+            "Recommendation took %.3fs → returned %d recipes", elapsed, len(results)
+        )
         for i, r in enumerate(results, 1):
-            print(f"  {i:2}. #{r['recipe_id']}  matched={r['matched']}  "
-                  f"missing={r['missing']}  score={r['score']:.3f}")
-        print()
+            logger.info("  %2d. %d  matched=%d  missing=%d  score=%.3f",
+                        i, r['recipe_id'], r['matched'], r['missing'], r['score'])
+        logger.info("")
 
         return results

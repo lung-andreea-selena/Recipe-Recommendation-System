@@ -1,7 +1,9 @@
-import time
+import time, logging
 from flask import Blueprint, json, request, jsonify, current_app
 from dtos.recipe_dto import RecipeDTO
 from repositories.raw_recipes_repo import RawRecipesRepo
+
+logger = logging.getLogger(__name__)
 
 recommend_bp = Blueprint("recommend", __name__)
 
@@ -48,7 +50,7 @@ def recommend():
         results.append(dto.to_dict())
 
     elapsed = time.time() - t0
-    print(f"[LOG] batch get_by_ids took {elapsed:.3f}s")
+    logger.info("Batch get_by_ids took %.3fs for %d recipes", elapsed, len(ids))
 
     return jsonify(page=page, per_page=per_page, has_more=has_more, recipes=results), 200
 
