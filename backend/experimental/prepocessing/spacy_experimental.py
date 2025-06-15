@@ -1,6 +1,3 @@
-# This script uses spaCy to clean a list of ingredients by lemmatizing and removing stop words and punctuation.
-# It processes the ingredients in a loop, storing the results in a DataFrame and saving it to a CSV file.
-# Elapsed time: 1.82 seconds
 import spacy
 import time
 import pandas as pd

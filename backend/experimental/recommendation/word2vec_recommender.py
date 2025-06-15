@@ -10,15 +10,11 @@ class Word2VecRecommender:
     def __init__(self, data_path: str,
                  vector_size: int = 100, window: int = 5,
                  min_count: int = 1, sg: int = 1, epochs: int = 10):
-        # 1) load data
         self.df = pd.read_csv(data_path)
         docs = self.df['cleaned_ingredients'].fillna('').tolist()
-        # Precompute unigram token sets for overlap logic
         self.rec_token_sets = [set(doc.split()) for doc in docs]
-        # 2) prepare corpus
         self.corpus = [doc.split() for doc in docs]
 
-        # 3) train Word2Vec model and measure time
         t0 = time.time()
         self.model = Word2Vec(
             sentences=self.corpus,
@@ -30,7 +26,6 @@ class Word2VecRecommender:
         )
         t1 = time.time()
 
-        # 4) precompute recipe embeddings and measure time
         self.recipe_vectors = np.vstack([
             self._vectorize(tokens) for tokens in self.corpus
         ])
@@ -49,42 +44,28 @@ class Word2VecRecommender:
         return np.mean(vecs, axis=0)
 
     def recommend(self, user_input: str, top_n: int = 10):
-        """
-        1) Build user embedding
-        2) Compute cosine similarities
-        3) Compute matched & missing counts (unigrams)
-        4) Filter out zero-match recipes
-        5) Sort by (fewest extras, most matches, highest similarity)
-        6) Return top_n results with timing breakdown
-        """
         t_start = time.time()
 
-        # 1) user embedding
         t1 = time.time()
         tokens = user_input.lower().replace(',', ' ').split()
         user_vec = self._vectorize(tokens).reshape(1, -1)
         t2 = time.time()
 
-        # 2) cosine similarity
         sims = cosine_similarity(user_vec, self.recipe_vectors).flatten()
         t3 = time.time()
 
-        # 3) overlap counts
         query_tokens = set(tokens)
         matched = np.array([len(rec & query_tokens) for rec in self.rec_token_sets])
         missing = np.array([len(rec - query_tokens) for rec in self.rec_token_sets])
         t4 = time.time()
 
-        # 4) filter candidates
         candidates = [i for i, m in enumerate(matched) if m > 0]
         t5 = time.time()
 
-        # 5) sort candidates
         candidates.sort(key=lambda i: (missing[i], -matched[i], -sims[i]))
         top_idxs = candidates[:top_n]
         t6 = time.time()
 
-        # 6) build recommendation list
         recs = []
         for rank, i in enumerate(top_idxs, start=1):
             recs.append({
@@ -96,7 +77,6 @@ class Word2VecRecommender:
             })
         t7 = time.time()
 
-        # print timing breakdown
         print(
             f"Timings (s): build_vec={t2-t1:.3f}, cosine={t3-t2:.3f}, \
             overlap={t4-t3:.3f}, filter={t5-t4:.3f}, sort={t6-t5:.3f}, build={t7-t6:.3f}, total={t7-t_start:.3f}"
@@ -116,7 +96,7 @@ class Word2VecRecommender:
         plt.savefig('experimental/recommendation/w2v_cookfrompantry_chart.png')
         plt.show()
 
-# Example usage:
+
 rec = Word2VecRecommender('dataset/tfidf_sample.csv')
 res = rec.recommend(
     'cream cheese tomato onion garlic basil olive oil salt pepper', top_n=10

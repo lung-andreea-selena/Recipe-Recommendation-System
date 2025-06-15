@@ -1,5 +1,3 @@
-# This script uses spaCy to clean ingredient lines by removing measurement nouns and retaining meaningful nouns. 
-# It processes a list of ingredient lines and saves the cleaned data to a CSV file.
 import spacy
 import time
 import pandas as pd
@@ -25,9 +23,9 @@ def clean_with_spacy_pos(text):
         lemma = token.lemma_.lower()
 
         if (
-            token.pos_ in ["NOUN", "PROPN"] and  # keep meaningful nouns
-            lemma not in MEASUREMENT_NOUNS and  # remove measurements
-            token.is_alpha                       # skip numbers or punctuation
+            token.pos_ in ["NOUN", "PROPN"] and  
+            lemma not in MEASUREMENT_NOUNS and  
+            token.is_alpha                       
         ):
             cleaned.append(lemma)
 

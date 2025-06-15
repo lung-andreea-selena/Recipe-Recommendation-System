@@ -20,10 +20,6 @@ class RawRecipesRepo:
             return []
 
     def get_by_ids(self, recipe_ids: List[int]) -> Dict[int, RawRecipe]:
-        """
-        Batch-fetch all the RawRecipe for the given list of IDs,
-        and return a dict recipe_id → RawRecipe.
-        """
         if not recipe_ids:
             return {}
 

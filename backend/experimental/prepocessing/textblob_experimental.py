@@ -1,8 +1,3 @@
-# This script uses TextBlob to clean a list of ingredients.
-# It processes the ingredients in a loop, storing the results in a DataFrame and saving it to a CSV file.
-# Elapsed time: 2.44 seconds
-# This script uses TextBlob to clean a list of ingredients by lemmatizing and removing stop words and punctuation.
-
 import time
 import pandas as pd
 from textblob import TextBlob

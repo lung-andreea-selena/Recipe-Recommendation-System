@@ -19,13 +19,10 @@ class TfidfW2VRecommender:
         tfidf_min_df: int = 2,
         tfidf_max_df: float = 0.8
     ):
-        # Load data
         self.df = pd.read_csv(data_path)
         docs = self.df["cleaned_ingredients"].fillna("").tolist()
-        # Precompute unigram token sets for overlap logic
         self.rec_token_sets = [set(doc.split()) for doc in docs]
 
-        # 1) Fit TF-IDF vectorizer
         t0 = time.time()
         self.tfidf = TfidfVectorizer(
             ngram_range=tfidf_ngram_range,
@@ -35,7 +32,6 @@ class TfidfW2VRecommender:
         self.tfidf_matrix = self.tfidf.fit_transform(docs)
         t1 = time.time()
 
-        # 2) Train Word2Vec model
         self.corpus_tokens = [doc.split() for doc in docs]
         t2 = time.time()
         self.w2v = Word2Vec(
@@ -48,7 +44,7 @@ class TfidfW2VRecommender:
         )
         t3 = time.time()
 
-        # 3) Precompute TF-IDF–weighted document embeddings
+
         self.doc_embeddings = np.vstack([
             self._weighted_vector(tokens, tfidf_row)
             for tokens, tfidf_row in zip(
@@ -81,46 +77,32 @@ class TfidfW2VRecommender:
         return np.sum(vecs, axis=0) / sum(weights)
 
     def recommend(self, user_input: str, top_n: int = 10):
-        """
-        Recommends top_n recipes using strict "cook-from-pantry" rule:
-          1) fewest missing unigrams
-          2) most matched unigrams
-          3) highest TF-IDF–W2V cosine score
-        Prints timing breakdown for each step.
-        """
         t_start = time.time()
 
-        # 1) TF-IDF transform
         t1 = time.time()
         user_tfidf = self.tfidf.transform([user_input]).toarray()[0]
         t2 = time.time()
 
-        # 2) Build user embedding (TF-IDF–weighted W2V)
         t3 = time.time()
         user_tokens = user_input.lower().replace(',', ' ').split()
         user_vec = self._weighted_vector(user_tokens, user_tfidf).reshape(1, -1)
         t4 = time.time()
 
-        # 3) Cosine similarity
         sims = cosine_similarity(user_vec, self.doc_embeddings).flatten()
         t5 = time.time()
 
-        # 4) Overlap counts on unigrams-only
         query_tokens = set(user_tokens)
         matched = np.array([len(rec & query_tokens) for rec in self.rec_token_sets])
         missing = np.array([len(rec - query_tokens) for rec in self.rec_token_sets])
         t6 = time.time()
 
-        # 5) Filter candidates with ≥1 match
         candidates = [i for i, m in enumerate(matched) if m > 0]
         t7 = time.time()
 
-        # 6) Sort by (missing asc, matched desc, score desc)
         candidates.sort(key=lambda i: (missing[i], -matched[i], -sims[i]))
         top_idxs = candidates[:top_n]
         t8 = time.time()
 
-        # 7) Build result list
         recs = []
         for rank, i in enumerate(top_idxs, start=1):
             recs.append({
@@ -152,7 +134,6 @@ class TfidfW2VRecommender:
         plt.savefig('experimental/recommendation/tfidf_w2v_cookfrompantry_chart.png')
         plt.show()
 
-# Example usage:
 rec = TfidfW2VRecommender(
     'dataset/tfidf_sample.csv',
     vector_size=100, window=5, min_count=2, sg=1, epochs=10,
