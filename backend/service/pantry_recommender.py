@@ -87,7 +87,7 @@ class PantryRecommender:
 
         elapsed = time.time() - start_time
         logger.info(
-            "Recommendation took %.3fs → returned %d recipes", elapsed, len(results)
+            "Recommendation took %.3fs -> returned %d recipes", elapsed, len(results)
         )
         for i, r in enumerate(results, 1):
             logger.info("  %2d. %d  matched=%d  missing=%d  score=%.3f",
