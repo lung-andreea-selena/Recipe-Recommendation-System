@@ -1,4 +1,3 @@
-// src/app/app-route-reuse.strategy.ts
 import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
