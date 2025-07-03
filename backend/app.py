@@ -17,13 +17,13 @@ def create_app():
     CORS(app)
 
     db1 = SessionLocal()
-    cleaned_objs    = CleanedIngredientsRepo(db1).get_all()
+    cleaned_objs = CleanedIngredientsRepo(db1).get_all()
     cleaned_records = [c.to_dict() for c in cleaned_objs]
     db1.close()
 
-    vectorizer        = joblib.load("models/tfidf_vectorizer.joblib")
-    tfidf_matrix      = load_npz("models/tfidf_matrix.npz")
-    recipe_ids        = np.load("models/recipe_ids.npy")
+    vectorizer = joblib.load("models/tfidf_vectorizer.joblib")
+    tfidf_matrix = load_npz("models/tfidf_matrix.npz")
+    recipe_ids = np.load("models/recipe_ids.npy")
 
     app.config["PANTRY_RECOMMENDER"] = PantryRecommender(
         vectorizer=vectorizer,
